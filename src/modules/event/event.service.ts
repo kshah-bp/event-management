@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, Between } from 'typeorm';
 import { Event } from './event.entity';
+import { User } from '../users/user.entity';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 
@@ -19,10 +20,13 @@ export class EventsService {
   constructor(
     @InjectRepository(Event)
     private repo: Repository<Event>,
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
   ) {}
 
-  async create(dto: CreateEventDto) {
-    const event = this.repo.create(dto);
+  async create(dto: CreateEventDto, userId: number) {
+    const createdBy = await this.userRepo.findOne({ where: { id: userId } });
+    const event = this.repo.create({ ...dto, createdBy: createdBy || undefined });
     return this.repo.save(event);
   }
 

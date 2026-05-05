@@ -84,8 +84,9 @@ export class EventsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtGuard)
   @Post()
-  create(@Body() dto: CreateEventDto) {
-    return this.eventsService.create(dto);
+  create(@Body() dto: CreateEventDto, @Req() req: Request) {
+    const userId = (req.user as any).id;
+    return this.eventsService.create(dto, userId);
   }
 
   @ApiBearerAuth('BearerAuth')
