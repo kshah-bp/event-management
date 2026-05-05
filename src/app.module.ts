@@ -6,6 +6,7 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { EventsModule } from './modules/event/event.module';
 import { RegistrationModule } from './modules/registration/registration.module';
+import { PricingModule } from './modules/pricing/pricing.module';
 
 import { typeOrmConfig } from './database/typeorm.config';
 
@@ -21,6 +22,7 @@ import { typeOrmConfig } from './database/typeorm.config';
     AuthModule,
     EventsModule,
     RegistrationModule,
+    PricingModule,
   ],
 })
 export class AppModule {}

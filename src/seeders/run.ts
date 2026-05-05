@@ -2,13 +2,15 @@ import 'dotenv/config';
 import { DataSource } from 'typeorm';
 import { typeOrmConfig } from '../database/typeorm.config';
 import { User } from '../modules/users/user.entity';
+import { PricingRule } from '../modules/pricing/pricing-rule.entity';
 import { seedAdmin } from './admin.seed';
+import { seedPricingRules } from './pricing-rules.seed';
 
 async function main() {
   const config = typeOrmConfig() as any;
   const dataSource = new DataSource({
     ...config,
-    entities: [User],
+    entities: [User, PricingRule],
   });
 
   await dataSource.initialize();
@@ -16,8 +18,11 @@ async function main() {
 
   const userRepo = dataSource.getRepository(User);
   await seedAdmin(userRepo);
+
+  const pricingRuleRepo = dataSource.getRepository(PricingRule);
+  await seedPricingRules(pricingRuleRepo);
   
-  console.log('Admin seed completed');
+  console.log('All seeds completed');
   await dataSource.destroy();
 }
 

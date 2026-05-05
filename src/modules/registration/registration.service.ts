@@ -5,11 +5,12 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Repository, Between, In } from 'typeorm';
 import { EventRegistration } from './event-registration.entity';
 import { Event } from '../event/event.entity';
 import { User } from '../users/user.entity';
 import { ListRegistrationsQueryDto } from './dto/list-registrations-query.dto';
+import { PricingEngineService } from '../pricing/pricing-engine.service';
 
 @Injectable()
 export class RegistrationService {
@@ -20,6 +21,7 @@ export class RegistrationService {
     private eventRepo: Repository<Event>,
     @InjectRepository(User)
     private userRepo: Repository<User>,
+    private pricingEngine: PricingEngineService,
   ) {}
 
   async registerForEvent(userId: number, eventId: number) {
@@ -34,8 +36,35 @@ export class RegistrationService {
     });
     if (existing) throw new ConflictException('Already registered for this event');
 
-    const registration = this.registrationRepo.create({ user, event });
-    return this.registrationRepo.save(registration);
+    return await this.eventRepo.manager.transaction(async (manager) => {
+      const eventRepo = manager.getRepository(Event);
+      const regRepo = manager.getRepository(EventRegistration);
+
+      const lockedEvent = await eventRepo.findOne({
+        where: { id: eventId },
+        lock: { mode: 'pessimistic_write' },
+      });
+
+      if (!lockedEvent) throw new NotFoundException('Event not found');
+
+      if (lockedEvent.bookedTickets >= lockedEvent.capacity) {
+        throw new BadRequestException('Event is fully booked');
+      }
+
+      const priceResult = await this.pricingEngine.calculateFinalPrice(lockedEvent);
+
+      lockedEvent.bookedTickets += 1;
+      await eventRepo.save(lockedEvent);
+
+      const registration = regRepo.create({
+        user,
+        event: lockedEvent,
+        finalPrice: priceResult.finalPrice,
+        priceBreakdown: priceResult.breakdown,
+      });
+
+      return regRepo.save(registration);
+    });
   }
 
   async getRegistrationsByEvent(eventId: number) {
