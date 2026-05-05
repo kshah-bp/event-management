@@ -8,7 +8,7 @@ export class RegistrationCronService {
 
   constructor(private readonly registrationService: RegistrationService) {}
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async handleExpiredRegistrations() {
     const count = await this.registrationService.expirePendingRegistrations();
     if (count > 0) this.logger.log(`Expired ${count} pending registrations`);

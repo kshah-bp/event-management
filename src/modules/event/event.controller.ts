@@ -22,6 +22,7 @@ import {
 import { Request } from 'express';
 import { EventsService } from './event.service';
 import { RegistrationService } from '../registration/registration.service';
+import { PricingEngineService } from '../pricing/pricing-engine.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { JwtGuard } from '../../common/guards/jwt.guard';
@@ -32,6 +33,7 @@ export class EventsController {
   constructor(
     private readonly eventsService: EventsService,
     private readonly registrationService: RegistrationService,
+    private readonly pricingEngine: PricingEngineService,
   ) {}
 
   @ApiOperation({ summary: 'Get all events' })
@@ -61,6 +63,16 @@ export class EventsController {
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.eventsService.findOne(id);
+  }
+
+  @ApiOperation({ summary: 'Get current ticket price for an event (base + dynamic pricing)' })
+  @ApiParam({ name: 'id', type: Number, description: 'Event ID' })
+  @ApiResponse({ status: 200, description: 'Price calculation with breakdown' })
+  @ApiResponse({ status: 404, description: 'Event not found' })
+  @Get(':id/price')
+  async getPrice(@Param('id', ParseIntPipe) id: number) {
+    const event = await this.eventsService.findOne(id);
+    return this.pricingEngine.calculateFinalPrice(event);
   }
 
   @ApiBearerAuth('BearerAuth')
