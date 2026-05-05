@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { EventsModule } from './modules/event/event.module';
 
 import { typeOrmConfig } from './database/typeorm.config';
 
@@ -13,10 +14,11 @@ import { typeOrmConfig } from './database/typeorm.config';
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
-      useFactory: typeOrmConfig,              // called lazily, after env is ready
+      useFactory: typeOrmConfig,
     }),
     UsersModule,
     AuthModule,
+    EventsModule,
   ],
 })
 export class AppModule {}
