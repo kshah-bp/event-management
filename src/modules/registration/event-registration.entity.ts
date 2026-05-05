@@ -1,0 +1,34 @@
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+  Unique,
+} from 'typeorm';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { User } from '../users/user.entity';
+import { Event } from '../event/event.entity';
+
+@Entity('event_registrations')
+@Unique('UQ_user_event', ['user', 'event'])
+export class EventRegistration {
+  @ApiProperty({ description: 'Unique identifier', example: 1 })
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @ApiProperty({ description: 'Registered user' })
+  @ManyToOne(() => User, { eager: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @ApiProperty({ description: 'Registered event' })
+  @ManyToOne(() => Event, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'event_id' })
+  event: Event;
+
+  @ApiProperty({ description: 'Registration timestamp' })
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+}

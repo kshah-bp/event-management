@@ -9,6 +9,7 @@ import {
   UseGuards,
   ParseIntPipe,
   Query,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -18,7 +19,9 @@ import {
   ApiBearerAuth,
   ApiQuery,
 } from '@nestjs/swagger';
+import { Request } from 'express';
 import { EventsService } from './event.service';
+import { RegistrationService } from '../registration/registration.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { JwtGuard } from '../../common/guards/jwt.guard';
@@ -26,7 +29,10 @@ import { JwtGuard } from '../../common/guards/jwt.guard';
 @ApiTags('Events')
 @Controller('events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(
+    private readonly eventsService: EventsService,
+    private readonly registrationService: RegistrationService,
+  ) {}
 
   @ApiOperation({ summary: 'Get all events' })
   @ApiQuery({ name: 'search', required: false, description: 'Search by title or description' })
@@ -55,6 +61,20 @@ export class EventsController {
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.eventsService.findOne(id);
+  }
+
+  @ApiBearerAuth('BearerAuth')
+  @ApiOperation({ summary: 'Register for an event' })
+  @ApiParam({ name: 'eventId', type: Number, description: 'Event ID' })
+  @ApiResponse({ status: 201, description: 'Registration successful' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Event not found' })
+  @ApiResponse({ status: 409, description: 'Already registered for this event' })
+  @UseGuards(JwtGuard)
+  @Post(':eventId/register')
+  registerForEvent(@Param('eventId', ParseIntPipe) eventId: number, @Req() req: Request) {
+    const userId = (req.user as any).id;
+    return this.registrationService.registerForEvent(userId, eventId);
   }
 
   @ApiBearerAuth('BearerAuth')

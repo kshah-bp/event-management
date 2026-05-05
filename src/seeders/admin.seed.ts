@@ -1,5 +1,4 @@
 import * as bcrypt from 'bcrypt';
-import { User } from '../modules/users/user.entity';
 import { Role } from '../common/enums/role.enum';
 
 export async function seedAdmin(repo : any) {
@@ -8,11 +7,12 @@ export async function seedAdmin(repo : any) {
   if (!admin) {
     const hash = await bcrypt.hash('admin123', 10);
 
-    await repo.save({
+    const result = await repo.save({
       name: 'Admin',
       email: 'admin@mail.com',
       password: hash,
       role: Role.ADMIN,
     });
+    console.log('Admin created:', result);
   }
 }

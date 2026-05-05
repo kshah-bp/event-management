@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { EventsModule } from './modules/event/event.module';
+import { RegistrationModule } from './modules/registration/registration.module';
 
 import { typeOrmConfig } from './database/typeorm.config';
 
@@ -19,6 +20,7 @@ import { typeOrmConfig } from './database/typeorm.config';
     UsersModule,
     AuthModule,
     EventsModule,
+    RegistrationModule,
   ],
 })
 export class AppModule {}

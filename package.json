@@ -7,6 +7,7 @@
     "start:debug": "nest start --debug --watch",
     "build": "nest build",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "seed": "npx ts-node src/seeders/run.ts",
     "test": "jest"
   },
   "dependencies": {
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.21",
-    "@types/bcrypt": "^6.0.0"
+    "@types/bcrypt": "^6.0.0",
+    "tsx": "^4.21.0"
   }
 }
